@@ -1,0 +1,53 @@
+```plantuml
+@startuml
+!theme plain
+package "Publisher Side" {
+  [Browser] as Browser
+  [Publisher Ad Server] as PubAd
+}
+
+package "Exchange Layer" {
+  [Edge/API] as Edge
+  [Auction Coordinator] as Auction
+  [Adapter Pool] as Adapters
+  [Timeout Manager] as Timeout
+  [Real-time Profile Store] as Profile
+  [Price Floor Service] as Floor
+  [Fraud/Policy Filter] as Policy
+  [Event Logger] as Logger
+}
+
+package "DSP Ecosystem" {
+  [DSP 1] as DSP1
+  [DSP 2] as DSP2
+  [DSP n] as DSPn
+}
+
+package "Infra & Data" {
+  [Kafka] as Kafka
+  [Redis/Aerospike] as Redis
+  [CDN] as CDN
+  [Stream Processor (Flink)] as Flink
+}
+
+Browser --> PubAd : ad request
+PubAd --> Edge : bid request
+Edge --> Profile : read/write features
+Edge --> Floor : get floor
+Edge --> Auction : forward
+Auction --> Adapters : fan-out
+Adapters --> DSP1 : bid request
+Adapters --> DSP2 : bid request
+Adapters --> DSPn : bid request
+DSP1 --> Adapters : bid response
+DSP2 --> Adapters : bid response
+Adapters --> Auction : responses
+Auction --> Policy : validate winner
+Auction --> Logger : log bid request/responses
+Logger --> Kafka : append
+Kafka --> Flink : stream
+Auction --> CDN : win-notify / creative fetch
+CDN --> PubAd : serve creative
+
+@enduml
+```
