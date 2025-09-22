@@ -1,0 +1,16 @@
+# Prompts used
+- how does real time ad bidding platforms work?
+- What are DSP and SSP?
+- What are the typical Latencies & throughput of these RTBs?
+- What is OpenRTB schema?
+- Go networking library for low latency
+- Generate a sequence diagram of the auction flow using Mermaid
+- Generate mermaid class diagram for these classes.
+- Compare envoy vs ngnix
+- What are the KPIs for an ad bidding platform?
+- Which cache to use for low latency high throughput profile store?
+- Ways to make redis fault-tolerant
+- What is OPA? Tell me about its latencies and scalability? 
+- How to improve latencies of OPA?
+- How does budget pacing work in RTB? What are the different algorithms?
+- Which Clickhouse v/s bigquery for OLAP in terms of scalability and performance for RTB?
