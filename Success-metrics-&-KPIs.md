@@ -17,7 +17,7 @@
 | Metric                  | Target / Expectation                   | Telemetry Source                              | Notes |
 |--------------------------|----------------------------------------|-----------------------------------------------|-------|
 | **Bid Response Win-Rate** | 10–20%                                | Kafka topic `bids` (response vs. wins) → ClickHouse aggregation | DSP-specific breakdowns via tags. |
-| **Fill Rate**            | >90%                                   | SSP → Exchange logs in Kafka (`ad_requests` vs. `ad_served`) | Real-time ratio tracked in Grafana. |
+| **Fill Rate(per SSP)**    | >80%                                   | SSP → Exchange logs in Kafka (`ad_requests` vs. `ad_served`) | Real-time ratio tracked in Grafana. |
 | **CTR / CVR Lift**       | +X% post-ML integration                | ClickHouse event tables (`impressions`, `clicks`, `conversions`) | Use dashboards in Superset/Looker. |
 | **Budget Pacing Accuracy** | ±2% deviation daily                   | Redis/Aerospike counters (online) vs. Flink aggregates (streaming) → ClickHouse | Alert if deviation >2%. |
 
