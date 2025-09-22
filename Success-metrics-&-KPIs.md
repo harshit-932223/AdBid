@@ -1,4 +1,4 @@
-# Success Metrics, Dashboards & Telemetry Sources
+# Success Metrics, Dashboards & Risk
 
 ## 1. Technical KPIs
 
@@ -61,3 +61,29 @@
 | **Throughput drop**        | <90% of baseline QPS           | Prometheus + Kafka offsets | Check Kafka lag, pod scaling. |
 | **Budget anomaly**         | >±5% deviation from pacing     | Flink vs. Redis counters | Alert product + disable overspending campaigns. |
 | **Infra cost spike**       | >20% week-over-week increase   | ClickHouse billing table + Cloud API | Review scaling policies, cost optimizations. |
+
+
+## 5. Risk Assessment
+
+| Risk                          | Impact                                                        | Mitigation                                                                                       |
+|-------------------------------|---------------------------------------------------------------|-------------------------------------------------------------------------------------------------|
+| **Latency spikes under scale** | Auctions may exceed SLA (>100ms), leading to lost bids & revenue | - Use fasthttp, connection pooling<br>- Horizontal scaling of AuctionCoordinator<br>- Pre-warm caches<br>- Continuous latency profiling & autoscaling |
+| **Redis cache misses**        | Extra DB lookups or auction failure → higher latency, inconsistent targeting/budget | - Write-through caching with TTL<br>- Shard & replicate Redis, enable persistence<br>- Monitor cache hit ratio (<95% triggers alert)<br>- Fallback to safe default behavior |
+| **Budget overdelivery**       | Advertisers spend more than allocated → financial/legal exposure | - Atomic counters in Redis/Aerospike per request<br>- Distributed locks or Lua scripts<br>- Secondary reconciliation in OLAP (ClickHouse/Druid)<br>- Hard stop thresholds (e.g., 99.5% spent) |
+| **Kafka consumer lag**        | Delayed event logging (impressions, clicks), breaking pacing & reporting | - Tune partitioning & batch sizes<br>- Scale consumers horizontally<br>- Use monitoring (Burrow, Cruise Control)<br>- Prioritize exactly-once idempotent producers |
+| **ML signal delays or failures** | Missing/late scores reduce bid quality, lower win rate & eCPM | - Timeout fallback to heuristic bidding<br>- Replicated ML inference service with caching<br>- Async enrichment pipeline (Flink/Kafka)<br>- Canary release for new models |
+| **Partial system outages**    | Lost traffic, failed auctions, revenue loss                  | - Multi-region deployment <br>- Circuit breakers & retries<br>- Graceful degradation (auction continues without optional services)<br>- Runbooks & automated failover (K8s + service mesh) |
+
+**Graceful degradation**
+
+```mermaid
+flowchart TD
+    A[Incoming Bid Request] --> B[AuctionCoordinator]
+    B --> C{ML Service Available?}
+    C -- Yes --> D[Use ML CTR/CVR Score]
+    C -- No --> E[Use Default Rule-Based Score]
+    D --> F[Bid Evaluation & Ranking]
+    E --> F[Bid Evaluation & Ranking]
+    F --> G[Select Winning Bid]
+    G --> H[Send Response to SSP/DSP]
+```
